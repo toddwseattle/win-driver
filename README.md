@@ -20,6 +20,7 @@ npm run install-windriver
 ```
 
 This command will:
+
 - Detect your system architecture (64-bit, 32-bit, or ARM64)
 - Download the WinAppDriver installer (if not already cached)
 - Perform a silent installation
