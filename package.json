@@ -4,7 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "npm run build && vitest run",
+    "build": "tsc",
+    "start": "node dist/calculator.js",
+    "build:run": "npm run build && npm start",
+    "raw-request": "npm run build && node dist/test-raw-request.js",
     "install-windriver": "node scripts/install-windriver.js"
   },
   "keywords": [],
@@ -13,9 +19,13 @@
   "type": "commonjs",
   "devDependencies": {
     "@types/node": "^25.0.6",
-    "typescript": "^5.9.3"
+    "@vitest/ui": "^4.0.16",
+    "happy-dom": "^20.1.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   },
   "dependencies": {
+    "node-fetch": "^3.3.2",
     "webdriverio": "^9.23.0"
   }
 }
