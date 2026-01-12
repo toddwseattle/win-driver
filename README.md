@@ -2,6 +2,14 @@
 
 A TypeScript project that uses Windows Application Driver (WinAppDriver) to automate, test, and read information from the Windows Calculator application.
 
+## Quick Start
+
+1. Enable Windows Developer Mode (see below).
+2. Install WinAppDriver: `npm run install-windriver`.
+3. Start WinAppDriver locally.
+4. Install project dependencies: `npm install`.
+5. Run the sample automation: `npm start` or send a raw request: `npm run raw-request`.
+
 ## Requirements
 
 - **Windows OS** (64-bit, 32-bit, or ARM64)
@@ -56,6 +64,9 @@ npm install
 ### Available Commands
 
 ```bash
+# Install WinAppDriver
+npm run install-windriver
+
 # Run tests in watch mode
 npm test
 
@@ -74,11 +85,8 @@ npm start
 # Build and run the calculator
 npm run build:run
 
-# Install WinAppDriver
-
 # Send a raw WinAppDriver session request (for testing)
 npm run raw-request
-npm run install-windriver
 ```
 
 ### WinAppDriver Client
@@ -137,3 +145,116 @@ This script will:
 - `windriver_install.ps1` - PowerShell script for automated WinAppDriver installation
 - `scripts/` - Node.js scripts for project automation
 - `scripts/install-windriver.js` - Wrapper script to run PowerShell installation with Windows detection
+
+---
+
+## WinAppDriver Setup Guide
+
+### What is WinAppDriver?
+
+WinAppDriver (Windows Application Driver) is a WebDriver implementation for Windows desktop applications, enabling Selenium-style UI automation for UWP, WinForms, WPF, and Win32 apps via the W3C WebDriver protocol.
+
+Official repo: https://github.com/microsoft/WinAppDriver
+
+### Key Features
+
+- Cross-language client support (JavaScript/TypeScript, C#, Java, Python)
+- Supports UWP, WinForms, WPF, and classic Win32 applications
+- Standards-based W3C WebDriver protocol
+- Works with the Windows SDK Inspect.exe tool for element discovery
+- Local or remote automation (e.g., Windows VMs) when a GUI session is active
+
+### Install WinAppDriver (Aligned with this repo)
+
+- Recommended: run the project script: `npm run install-windriver`.
+  - Executes the PowerShell installer in [scripts/install-windriver.js](scripts/install-windriver.js), which calls [windriver_install.ps1](windriver_install.ps1).
+  - Detects architecture and performs a silent install, then verifies installation.
+- Manual alternative: download from Releases and install interactively: https://github.com/microsoft/WinAppDriver/releases
+
+### Start WinAppDriver
+
+WinAppDriver listens on `http://127.0.0.1:4723` by default.
+
+PowerShell:
+
+```powershell
+# Common install locations (depends on OS/installer)
+cd "C:\Program Files\Windows Application Driver"     # 64-bit/ARM64 systems (per our installer)
+# or
+cd "C:\Program Files (x86)\Windows Application Driver" # Typical x64 installer location
+
+./WinAppDriver.exe
+```
+
+You should see:
+
+```
+Windows Application Driver listening for requests at: http://127.0.0.1:4723/
+Press ENTER to exit.
+```
+
+Notes:
+
+- Start WinAppDriver before running scripts/tests in this repo.
+- Keep the WinAppDriver console window open while testing.
+- Requires an active desktop session (not headless).
+
+### Optional: Inspect.exe (Windows SDK)
+
+Install the Windows SDK to use `inspect.exe` for discovering UI element properties.
+
+- Download: https://developer.microsoft.com/en-us/windows/downloads/windows-sdk/
+- Typical path: `C:\Program Files (x86)\Windows Kits\10\bin\<version>\x64\inspect.exe`
+
+### Supported Locator Strategies
+
+| Strategy         | Example               | Use Case                              |
+| ---------------- | --------------------- | ------------------------------------- |
+| accessibility id | `num5Button`          | Best when `AutomationId` is available |
+| xpath            | `//Button[@Name='5']` | Flexible, combine attributes          |
+| class name       | `Button`              | Control type                          |
+| name             | `5`                   | Visible name/text                     |
+| id               | `num5Button`          | Same as accessibility id              |
+
+### Common App IDs
+
+Built-in Windows apps:
+
+```typescript
+// Calculator (UWP)
+app: "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App";
+
+// Notepad (Classic)
+app: "C:\\Windows\\System32\\notepad.exe";
+
+// Paint (UWP)
+app: "Microsoft.Paint_8wekyb3d8bbwe!App";
+
+// Settings (UWP)
+app: "Windows.ImmersiveControlPanel_cw5n1h2txyewy!microsoft.windows.immersivecontrolpanel";
+```
+
+### Troubleshooting
+
+- WinAppDriver won’t start: ensure Developer Mode is enabled and port 4723 is free; try running as Administrator.
+- Unable to create session: confirm WinAppDriver is running and the app path/package is correct.
+- Elements not found: verify properties with `inspect.exe`; use proper locator strategy; add explicit waits.
+- Slow automation: reduce implicit waits; prefer explicit waits; ensure sufficient machine resources.
+
+### Remote Automation (VM/Cloud)
+
+WinAppDriver can run on remote Windows VMs (Azure, AWS, etc.).
+
+- Install WinAppDriver on the VM and keep an RDP session active.
+- Allow inbound traffic on port 4723.
+- Update connection settings in code (e.g., `hostname` and `port`).
+
+Example:
+
+```typescript
+const client = new WinAppDriverClient({
+  hostname: "your-vm-ip-address",
+  port: 4723,
+  app: "Microsoft.WindowsCalculator_8wekyb3d8bbwe!App",
+});
+```
