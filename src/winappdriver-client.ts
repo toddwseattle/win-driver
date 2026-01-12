@@ -24,7 +24,6 @@
  * await client.closeSession();
  * ```
  */
-import fetch from "node-fetch";
 
 interface SessionOptions {
   hostname: string;
@@ -36,14 +35,24 @@ interface Element {
   ELEMENT: string;
 }
 
+/**
+ * Lightweight WinAppDriver client for creating sessions and automating Windows apps via the WebDriver protocol.
+ */
 export class WinAppDriverClient {
   private sessionId: string | null = null;
   private baseUrl: string;
 
+  /**
+   * Create a client targeting a WinAppDriver host.
+   * @param options Connection and app launch settings.
+   */
   constructor(private options: SessionOptions) {
     this.baseUrl = `http://${options.hostname}:${options.port}`;
   }
 
+  /**
+   * Start a new automation session for the configured app.
+   */
   async startSession() {
     const response = await fetch(`${this.baseUrl}/session`, {
       method: "POST",
@@ -66,6 +75,11 @@ export class WinAppDriverClient {
   }
 
   // ELEMENT FINDING
+  /**
+   * Find a single element.
+   * @param strategy Locator strategy (e.g., xpath, accessibility id).
+   * @param selector Selector value for the chosen strategy.
+   */
   async findElement(strategy: string, selector: string): Promise<Element> {
     const response = await fetch(
       `${this.baseUrl}/session/${this.sessionId}/element`,
@@ -79,6 +93,11 @@ export class WinAppDriverClient {
     return data.value;
   }
 
+  /**
+   * Find multiple elements.
+   * @param strategy Locator strategy.
+   * @param selector Selector value.
+   */
   async findElements(strategy: string, selector: string): Promise<Element[]> {
     const response = await fetch(
       `${this.baseUrl}/session/${this.sessionId}/elements`,
@@ -93,6 +112,9 @@ export class WinAppDriverClient {
   }
 
   // INTERACTIONS
+  /**
+   * Click an element.
+   */
   async click(element: Element) {
     await fetch(
       `${this.baseUrl}/session/${this.sessionId}/element/${element.ELEMENT}/click`,
@@ -100,6 +122,10 @@ export class WinAppDriverClient {
     );
   }
 
+  /**
+   * Send text to an element.
+   * @param text String to type.
+   */
   async sendKeys(element: Element, text: string) {
     await fetch(
       `${this.baseUrl}/session/${this.sessionId}/element/${element.ELEMENT}/value`,
@@ -111,6 +137,9 @@ export class WinAppDriverClient {
     );
   }
 
+  /**
+   * Clear an element's value.
+   */
   async clear(element: Element) {
     await fetch(
       `${this.baseUrl}/session/${this.sessionId}/element/${element.ELEMENT}/clear`,
@@ -119,6 +148,9 @@ export class WinAppDriverClient {
   }
 
   // ELEMENT PROPERTIES
+  /**
+   * Read visible text from an element.
+   */
   async getText(element: Element): Promise<string> {
     const response = await fetch(
       `${this.baseUrl}/session/${this.sessionId}/element/${element.ELEMENT}/text`,
@@ -128,6 +160,10 @@ export class WinAppDriverClient {
     return data.value;
   }
 
+  /**
+   * Read an element attribute.
+   * @param attributeName Name of the attribute.
+   */
   async getAttribute(element: Element, attributeName: string): Promise<string> {
     const response = await fetch(
       `${this.baseUrl}/session/${this.sessionId}/element/${element.ELEMENT}/attribute/${attributeName}`,
@@ -137,6 +173,9 @@ export class WinAppDriverClient {
     return data.value;
   }
 
+  /**
+   * Check element visibility.
+   */
   async isDisplayed(element: Element): Promise<boolean> {
     const response = await fetch(
       `${this.baseUrl}/session/${this.sessionId}/element/${element.ELEMENT}/displayed`,
@@ -146,6 +185,9 @@ export class WinAppDriverClient {
     return data.value;
   }
 
+  /**
+   * Check if element is enabled.
+   */
   async isEnabled(element: Element): Promise<boolean> {
     const response = await fetch(
       `${this.baseUrl}/session/${this.sessionId}/element/${element.ELEMENT}/enabled`,
@@ -156,6 +198,9 @@ export class WinAppDriverClient {
   }
 
   // KEYBOARD ACTIONS
+  /**
+   * Send keys to the active window (not a specific element).
+   */
   async sendGlobalKeys(keys: string) {
     // Send keyboard input to the session (not to a specific element)
     await fetch(`${this.baseUrl}/session/${this.sessionId}/keys`, {
@@ -166,6 +211,9 @@ export class WinAppDriverClient {
   }
 
   // WINDOW MANAGEMENT
+  /**
+   * Get all window handles for the session.
+   */
   async getWindowHandles(): Promise<string[]> {
     const response = await fetch(
       `${this.baseUrl}/session/${this.sessionId}/window_handles`,
@@ -175,6 +223,9 @@ export class WinAppDriverClient {
     return data.value;
   }
 
+  /**
+   * Switch to a given window handle.
+   */
   async switchToWindow(handle: string) {
     await fetch(`${this.baseUrl}/session/${this.sessionId}/window`, {
       method: "POST",
@@ -184,6 +235,9 @@ export class WinAppDriverClient {
   }
 
   // SCREENSHOTS
+  /**
+   * Capture a base64-encoded PNG of the current window.
+   */
   async takeScreenshot(): Promise<string> {
     const response = await fetch(
       `${this.baseUrl}/session/${this.sessionId}/screenshot`,
@@ -194,10 +248,16 @@ export class WinAppDriverClient {
   }
 
   // UTILITY
+  /**
+   * Sleep helper for simple waits.
+   */
   async sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  /**
+   * Close the active session if one exists.
+   */
   async closeSession() {
     if (this.sessionId) {
       await fetch(`${this.baseUrl}/session/${this.sessionId}`, {

@@ -10,6 +10,8 @@ A TypeScript project that uses Windows Application Driver (WinAppDriver) to auto
 4. Install project dependencies: `npm install`.
 5. Run the sample automation: `npm start` or send a raw request: `npm run raw-request`.
 
+- The calculator script now captures **before** and **after** screenshots and saves them to `screenshots/` (auto-created; ignored by git).
+
 ## Requirements
 
 - **Windows OS** (64-bit, 32-bit, or ARM64)
@@ -88,6 +90,11 @@ npm run build:run
 # Send a raw WinAppDriver session request (for testing)
 npm run raw-request
 ```
+
+### Screenshots
+
+- The calculator automation captures a `before.png` and `after.png` screenshot by default.
+- Files are written to `screenshots/` (created on demand and excluded from git).
 
 ### WinAppDriver Client
 

@@ -1,5 +1,6 @@
 // calculator.ts
 import { WinAppDriverClient } from "./winappdriver-client";
+import { saveScreenshot } from "./save-screenshot";
 
 async function runCalculatorTest() {
   const client = new WinAppDriverClient({
@@ -10,6 +11,8 @@ async function runCalculatorTest() {
 
   try {
     await client.startSession();
+
+    await saveScreenshot(client, "before.png");
 
     // Click 5
     const five = await client.findElement(
@@ -46,6 +49,8 @@ async function runCalculatorTest() {
     );
     const text = await client.getText(result);
     console.log("Result:", text);
+
+    await saveScreenshot(client, "after.png");
   } finally {
     await client.closeSession();
   }
